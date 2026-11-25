@@ -18,6 +18,9 @@ The QR code on each big screen points to the matching phone page automatically.
 
 Deploy (no install needed): Cloudflare dashboard → Workers & Pages → Create → Import a repository →
 this repo, **Root directory = `cloudflare-server`**, project name `ceg-retro-shake`.
+Live server: https://ceg-retro-shake.m-hanifhalim93.workers.dev (check `/health` → `ok`).
+Every push to `main` redeploys it automatically.
+
 Then add the secret **`HOST_KEY`** (Settings → Variables and Secrets) — that's the big-screen password.
 
 Or from a PC with Node.js:

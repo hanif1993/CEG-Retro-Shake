@@ -2,6 +2,8 @@
 name = "ceg-retro-shake"
 main = "worker.js"
 compatibility_date = "2025-11-01"
+workers_dev = true       # address: https://ceg-retro-shake.m-hanifhalim93.workers.dev
+preview_urls = false
 
 [[durable_objects.bindings]]
 name = "GAME"
