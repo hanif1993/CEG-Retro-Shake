@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>INTEL CEG MYS RETRO NIGHT • SHAKE-it CHALLENGE</title>
+  <style>
+    /* 70s/80s Retro Grid & Neon Styles */
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background-color: #0c0f1d;
+      background-image:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 6px 100%;
+      color: white;
+      padding: 25px;
+      margin: 0;
+      user-select: none;
+    }
+
+    .header-container { text-align: center; margin-bottom: 20px; }
+    h1 {
+      font-size: 3.4rem;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
+      font-weight: 900;
+    }
+    .main-title-2 {
+      font-size: 4rem;
+      color: #ff007f;
+      text-shadow: 0 0 10px #ff007f, 0 0 25px #ff007f, 0 0 50px #ff007f;
+      letter-spacing: 5px;
+      margin-top: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #ffbf00;
+      font-size: 1.4rem;
+      margin-top: 15px;
+      margin-bottom: 25px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 8px rgba(255, 191, 0, 0.7);
+    }
+
+    #controlBar {
+      max-width: 1100px;
+      margin: 0 auto 25px auto;
+      background: #121526;
+      border-radius: 12px;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 3px solid #ff007f;
+      box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+    }
+    .btn-container { display: flex; gap: 12px; align-items: center; }
+    .btn-control {
+      background: #ff007f;
+      color: white;
+      font-family: inherit;
+      font-size: 1.25rem;
+      font-weight: bold;
+      padding: 14px 28px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 0 15px #ff007f;
+      transition: all 0.2s;
+    }
+    .btn-control:hover { background: #00ffff; color: #090b15; box-shadow: 0 0 25px #00ffff; }
+
+    .btn-reset {
+      background: #27272a;
+      border: 2px solid #ef4444;
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+      font-size: 1.1rem;
+      padding: 14px 20px;
+    }
+    .btn-reset:hover { background: #ef4444; color: white; box-shadow: 0 0 20px #ef4444; }
+
+    .btn-export {
+      background: #10b981;
+      border: 2px solid #34d399;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
+      font-size: 1.15rem;
+      padding: 14px 22px;
+      display: none;
+    }
+    .btn-export:hover { background: #059669; box-shadow: 0 0 22px #10b981; }
+
+    .timer-box { font-size: 2.3rem; color: #00ffff; font-weight: bold; text-shadow: 0 0 10px #00ffff; }
+    .round-info { font-size: 1.3rem; color: #ffbf00; font-weight: bold; text-shadow: 0 0 5px rgba(255,191,0,0.5); }
+    /* NEW: small live-link / phones-reporting line under the round status */
+    .link-info { font-size: 0.95rem; margin-top: 6px; font-weight: bold; }
+    .link-ok { color: #34d399; }
+    .link-bad { color: #ef4444; }
+
+    #raceTrack {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #121526;
+      border-radius: 16px;
+      padding: 25px;
+      border: 3px solid #3d1b5c;
+      box-shadow: 0 0 35px rgba(255, 0, 127, 0.15);
+      min-height: 480px;
+    }
+    .racer { margin: 16px 0; background: #090b15; border-radius: 12px; padding: 5px; border: 2px solid #3d1b5c; position: relative; overflow: hidden; }
+    .bar {
+      height: 46px;
+      background: linear-gradient(90deg, #ff007f, #b300ff, #00ffff, #ffbf00);
+      border-radius: 8px;
+      transition: width 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      align-items: center;
+      padding-left: 15px;
+      font-weight: bold;
+      white-space: nowrap;
+      font-size: 1.2rem;
+      color: #FFFFFF;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+    }
+
+    /* Live Participant Counter - Glowing Retro Yellow */
+    .player-counter {
+      color: #ffbf00;
+      text-shadow: 0 0 12px #ffbf00;
+      font-weight: bold;
+      font-size: 1.8rem;
+      margin: 15px auto;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-container">
+    <h1>🕺 INTEL CEG MYS RETRO NIGHT 🕺</h1>
+    <h1 class="main-title-2">✨ SHAKE-it CHALLENGE ✨</h1>
+  </div>
+
+  <div class="subtitle">🚀 HIT THE TURBO BOOST • GO FOR THE HIGH SCORE! 📼 🕹️</div>
+
+  <!-- Host Controls Panel -->
+  <div id="controlBar">
+    <div>
+      <div class="round-info" id="roundStatus">ROUND 1 OF 3 (STANDBY)</div>
+      <div class="link-info link-bad" id="linkStatus">🔴 CONNECTING…</div>
+    </div>
+    <div class="timer-box" id="timeRemaining">30s</div>
+    <div class="btn-container">
+      <button class="btn-control btn-export" id="exportBtn" onclick="exportFullLeaderboard()">📥 EXPORT FULL RESULTS (CSV)</button>
+      <button class="btn-control btn-reset" onclick="resetTournament()">⚠️ RESET ALL</button>
+      <button class="btn-control" id="startBtn" onclick="triggerStart()">START ROUND 1</button>
+    </div>
+  </div>
+
+  <!-- Realtime Track Arena -->
+  <div id="raceTrack"></div>
+
+  <script>
+    // =====================================================================
+    // CONFIG — put your Worker address here after deploying (same in index.html)
+    // =====================================================================
+    const WORKER_URL = 'https://ceg-retro-shake.YOUR-SUBDOMAIN.workers.dev';
+    const WS_URL = WORKER_URL.replace(/^http/, 'ws') + '/ws';
+    const JOIN_URL = 'https://hanif1993.github.io/CEG-Retro-Shake/';
+    const KEY_STORAGE = 'ceg_retro_shake_host_key';
+
+    // Host key (password for this screen). Open screen.html?key=YOURKEY once, or type it when asked.
+    let hostKey = new URLSearchParams(location.search).get('key') || '';
+    try { if (hostKey) localStorage.setItem(KEY_STORAGE, hostKey); else hostKey = localStorage.getItem(KEY_STORAGE) || ''; } catch (e) {}
+    if (!hostKey) hostKey = (prompt('Enter the HOST KEY for the big screen:') || '').trim();
+
+    // =====================================================================
+    // STATE (the server holds the real game; this page only shows it)
+    // =====================================================================
+    let ws = null;
+    let reconnectAttempt = 0;
+    let reconnectTimer = null;
+    let board = null;            // last leaderboard message from the server
+    let roundEndsAtLocal = 0;
+    let shownStandby = false;
+
+    // =====================================================================
+    // CONNECTION
+    // =====================================================================
+    let lastServerMsgAt = 0;
+
+    function connect() {
+      if (ws && ws.readyState <= 1) return;
+      clearTimeout(reconnectTimer);
+      const sock = new WebSocket(`${WS_URL}?role=host&key=${encodeURIComponent(hostKey)}`);
+      ws = sock;
+      lastServerMsgAt = Date.now();
+      sock.onopen = () => { reconnectAttempt = 0; setLink(true); };
+      sock.onmessage = (ev) => {
+        if (ws !== sock) return;
+        lastServerMsgAt = Date.now();
+        let m;
+        try { m = JSON.parse(ev.data); } catch (e) { return; }
+        if (m.t === 'board') onBoard(m);
+        else if (m.t === 'results') downloadCsv(m);
+        else if (m.t === 'error') onKeyError(m.reason);
+      };
+      sock.onclose = (ev) => {
+        if (ws !== sock) return;                // already abandoned by the watchdog
+        ws = null;
+        setLink(false);
+        if (ev.code === 4001) return;           // wrong key: onKeyError() handles it
+        const steps = [500, 1000, 2000, 4000];
+        reconnectTimer = setTimeout(connect, steps[Math.min(reconnectAttempt++, steps.length - 1)]);
+      };
+    }
+
+    // Watchdog: ask for the board every 5 s; if the server stays silent for 12 s, reconnect.
+    setInterval(() => {
+      if (!ws) return;
+      if (ws.readyState === 1) { try { ws.send(JSON.stringify({ t: 'board' })); } catch (e) {} }
+      if (Date.now() - lastServerMsgAt > 12000) {
+        const dead = ws; ws = null;
+        dead.onopen = dead.onmessage = dead.onclose = dead.onerror = null;
+        try { dead.close(); } catch (e) {}
+        setLink(false);
+        connect();
+      }
+    }, 5000);
+
+    function onKeyError(reason) {
+      try { localStorage.removeItem(KEY_STORAGE); } catch (e) {}
+      const msg = reason === 'no_host_key_set'
+        ? 'The server has no HOST_KEY set yet. Run: npx wrangler secret put HOST_KEY'
+        : 'Wrong host key. Please enter it again:';
+      hostKey = (prompt(msg) || '').trim();
+      if (hostKey) { try { localStorage.setItem(KEY_STORAGE, hostKey); } catch (e) {} setTimeout(connect, 300); }
+    }
+
+    function send(obj) {
+      if (!ws || ws.readyState !== 1) { alert('Not connected to the game server yet — please wait a moment.'); return false; }
+      ws.send(JSON.stringify(obj));
+      return true;
+    }
+
+    // =====================================================================
+    // BUTTONS
+    // =====================================================================
+    function triggerStart() {
+      if (!board || (board.phase !== 'standby' && board.phase !== 'between')) return;
+      if (send({ t: 'start' })) setStartButton(false);
+    }
+
+    function resetTournament() {
+      if (confirm("⚠️ Are you sure you want to RESET the entire game? This deletes all scores!")) {
+        send({ t: 'reset' });
+      }
+    }
+
+    function exportFullLeaderboard() {
+      send({ t: 'export' });     // server replies with the full results -> downloadCsv()
+    }
+
+    // =====================================================================
+    // DISPLAY
+    // =====================================================================
+    function setLink(ok) {
+      const el = document.getElementById('linkStatus');
+      el.className = 'link-info ' + (ok ? 'link-ok' : 'link-bad');
+      el.dataset.ok = ok ? '1' : '';
+      updateLinkLine();
+    }
+
+    function updateLinkLine() {
+      const el = document.getElementById('linkStatus');
+      const ok = el.dataset.ok === '1';
+      let text = ok ? '🟢 LIVE LINK' : '🔴 RECONNECTING…';
+      if (board) {
+        if (board.phase === 'live' || board.phase === 'tally') text += ` • 📡 ${board.reporting}/${board.players} phones reporting`;
+        else text += ` • ${board.players} dancers (${board.online} online)`;
+      }
+      el.innerText = text;
+    }
+
+    function setStartButton(enabled, label) {
+      const btn = document.getElementById('startBtn');
+      btn.disabled = !enabled;
+      btn.style.opacity = enabled ? '1' : '0.5';
+      if (label) btn.innerText = label;
+    }
+
+    function standbyHtml(count) {
+      const qr = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' +
+                 encodeURIComponent(JOIN_URL) + '&color=ff007f&bgcolor=121526';
+      return `
+        <div id="standbyMessage" style="text-align: center; padding: 40px 50px; color: #64748B; font-size: 1.5rem; line-height: 1.8;">
+          <span style="color: #ff007f; text-shadow: 0 0 5px #ff007f; font-weight: bold;">Scan the QR code to join the dance floor!</span><br><br>
+          <img src="${qr}" alt="Scan to Join"
+               style="border: 4px solid #00ffff; border-radius: 12px; box-shadow: 0 0 20px #00ffff; margin: 10px auto;"/><br>
+          <div class="player-counter" id="liveCounter">⚡ DANCERS JOINED IN: ${count}</div>
+          Press [START ROUND 1] when everyone is locked in!
+        </div>`;
+    }
+
+    function onBoard(b) {
+      board = b;
+      const R = b.round, N = b.totalRounds;
+      const status = document.getElementById('roundStatus');
+      document.getElementById('startBtn').style.display = b.phase === 'finished' ? 'none' : 'inline-block';
+      document.getElementById('exportBtn').style.display =
+        (b.phase === 'between' || b.phase === 'finished' || (b.phase !== 'standby' && R > 1)) ? 'inline-block' : 'none';
+
+      if (b.phase === 'standby') {
+        status.innerText = `ROUND 1 OF ${N} (STANDBY)`;
+        setStartButton(true, 'START ROUND 1');
+        roundEndsAtLocal = 0;
+        document.getElementById('timeRemaining').innerText = `${b.roundSeconds}s`;
+        if (!shownStandby || !document.getElementById('liveCounter')) {
+          document.getElementById('raceTrack').innerHTML = standbyHtml(b.players);
+          shownStandby = true;
+        } else {
+          document.getElementById('liveCounter').innerText = `⚡ DANCERS JOINED IN: ${b.players}`;
+        }
+      } else {
+        shownStandby = false;
+        if (b.phase === 'live') {
+          status.innerText = `⚡ ROUND ${R} RUNNING! ⚡`;
+          setStartButton(false);
+          roundEndsAtLocal = Date.now() + b.timeLeftMs;
+        } else if (b.phase === 'tally') {
+          status.innerText = `🏁 ROUND ${R} OVER! TALLYING FINAL SCORES…`;
+          setStartButton(false);
+          roundEndsAtLocal = 0;
+          document.getElementById('timeRemaining').innerText = '00s';
+        } else if (b.phase === 'between') {
+          status.innerText = `🏁 ROUND ${R - 1} OVER! GET READY FOR ROUND ${R}`;
+          setStartButton(true, `START ROUND ${R}`);
+          roundEndsAtLocal = 0;
+          document.getElementById('timeRemaining').innerText = `${b.roundSeconds}s`;
+        } else if (b.phase === 'finished') {
+          status.innerText = `👾 GAME OVER • TOURNAMENT FINISHED 👾`;
+          roundEndsAtLocal = 0;
+          document.getElementById('timeRemaining').innerText = '00s';
+        }
+        renderLeaderboard(b.top);
+      }
+      updateLinkLine();
+    }
+
+    // Smooth countdown between server updates
+    setInterval(() => {
+      if (!roundEndsAtLocal) return;
+      const left = Math.max(0, Math.ceil((roundEndsAtLocal - Date.now()) / 1000));
+      document.getElementById('timeRemaining').innerText = `${left}s`;
+    }, 250);
+
+    function renderLeaderboard(top) {
+      const track = document.getElementById('raceTrack');
+      if (!top || top.length === 0) return;
+      const topScore = top[0].total || 1;
+      if (track.querySelectorAll('.racer .bar').length !== top.length) {
+        track.innerHTML = top.map(() => `
+          <div class="racer">
+            <div class="bar" style="width: 12%;"></div>
+          </div>`).join('');
+      }
+      const bars = track.querySelectorAll('.racer .bar');
+      top.forEach((p, index) => {
+        const pct = Math.min(100, Math.max(12, Math.round((p.total / (topScore * 1.15)) * 100)));
+        let iconMarker = '';
+        if (index === 0) iconMarker = '👑 🪩 ';
+        else if (index === 1) iconMarker = '⚡ 📼 ';
+        else if (index === 2) iconMarker = '✨ 🛼 ';
+        else if (index === 3) iconMarker = '📻 ';
+        else if (index === 4) iconMarker = '🕹️ ';
+        else iconMarker = '👾 ';
+        bars[index].style.width = `${pct}%`;
+        bars[index].textContent = `${iconMarker}#${index + 1} ${p.name} — ${p.total} pts (Round: ${p.roundScore})`;
+      });
+    }
+
+    function downloadCsv(res) {
+      if (!res.players || res.players.length === 0) { alert("No player scores to export!"); return; }
+      const cols = [];
+      for (let r = 1; r <= res.totalRounds; r++) cols.push(`Round ${r}`);
+      let csv = `Rank,Player Info,${cols.join(',')},Total Score\n`;
+      res.players.forEach((p, idx) => {
+        const safeName = `"${String(p.name || 'Unknown').replace(/"/g, '""')}"`;
+        const per = [];
+        for (let r = 1; r <= res.totalRounds; r++) per.push((p.rounds && p.rounds[r]) || 0);
+        csv += `${idx + 1},${safeName},${per.join(',')},${p.total}\n`;
+      });
+      // "﻿" (BOM) makes Excel read emoji/Malay characters correctly
+      const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `CEG_Retro_Shake_Results_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // =====================================================================
+    // STARTUP
+    // =====================================================================
+    document.getElementById('raceTrack').innerHTML = standbyHtml(0);
+    setStartButton(false, 'START ROUND 1');
+    connect();
+  </script>
+</body>
+</html>

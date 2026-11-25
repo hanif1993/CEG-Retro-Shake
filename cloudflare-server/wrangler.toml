@@ -1,0 +1,16 @@
+# Cloudflare config for the SHAKE-it game server (Workers Free plan)
+name = "ceg-retro-shake"
+main = "worker.js"
+compatibility_date = "2025-11-01"
+
+[[durable_objects.bindings]]
+name = "GAME"
+class_name = "GameRoom"
+
+# Free plan only allows SQLite-backed Durable Objects
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["GameRoom"]
+
+# HOST_KEY (password for the big screen) is set as a secret, not here:
+#   npx wrangler secret put HOST_KEY

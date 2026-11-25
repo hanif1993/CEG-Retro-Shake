@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>INTEL CEG MYS RETRO NIGHT • SHAKE-it CHALLENGE</title>
+  <style>
+    html, body {
+      position: fixed;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      text-align: center;
+      padding: 20px 15px;
+      background-color: #0c0f1d;
+      background-image:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 4px, 6px 100%;
+      color: #fff;
+      box-sizing: border-box;
+    }
+    .retro-icons { font-size: 1.8rem; letter-spacing: 6px; margin-bottom: 5px; margin-top: 10px; }
+    h1 { font-size: 1.45rem; margin: 0; text-transform: uppercase; letter-spacing: 2px; color: #00ffff; text-shadow: 0 0 8px #00ffff, 0 0 18px #00ffff; font-weight: 900; }
+    .title-line-2 { font-size: 1.75rem; color: #ff007f; text-shadow: 0 0 8px #ff007f, 0 0 20px #ff007f; letter-spacing: 2px; margin-top: 3px; margin-bottom: 5px; }
+    .tagline { color: #ffbf00; font-size: 0.85rem; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; text-shadow: 0 0 6px rgba(255, 191, 0, 0.7); margin-bottom: 15px; }
+    .card-box { background: #121526; border: 2px solid #3d1b5c; box-shadow: 0 0 25px rgba(255, 0, 127, 0.2); border-radius: 16px; padding: 15px 12px; max-width: 340px; margin: 0 auto; }
+    .input-label { color: #00ffff; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: block; margin-top: 8px; margin-bottom: 3px; }
+    input, button { font-family: inherit; font-size: 1.1rem; padding: 12px 16px; margin: 6px 0; border-radius: 8px; border: none; width: 92%; max-width: 290px; box-sizing: border-box; }
+    input { background: #090b15; color: #fff; border: 2px solid #ff007f; text-align: center; box-shadow: inset 0 0 8px rgba(255, 0, 127, 0.3); }
+    input:focus { outline: none; border-color: #00ffff; box-shadow: 0 0 12px #00ffff; }
+    .btn-main { background: linear-gradient(90deg, #ff007f, #b300ff); color: white; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 15px; box-shadow: 0 0 18px #ff007f; letter-spacing: 1px; }
+    #scoreDisplay { font-size: 4.8rem; font-weight: bold; color: #00ffff; margin: 5px 0; text-shadow: 0 0 15px #00ffff, 0 0 30px #00ffff; }
+    #timerDisplay { font-size: 2rem; font-weight: bold; color: #ffbf00; margin: 5px 0; text-shadow: 0 0 10px #ffbf00; }
+    .status-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; margin-bottom: 8px; }
+    .status-wait { background: #1e293b; color: #ffbf00; border: 1px solid #ffbf00; }
+    .status-shake { background: #ff007f; color: #fff; box-shadow: 0 0 15px #ff007f; animation: pulse 0.8s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.06); } 100% { transform: scale(1); } }
+    /* NEW: small connection indicator + warning box */
+    .conn-status { font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 6px; }
+    .conn-ok { color: #34d399; }
+    .conn-bad { color: #ffbf00; }
+    .warn-box { background: #3b0a1e; border: 2px solid #ff007f; color: #fff; border-radius: 10px; padding: 8px 10px; font-size: 0.8rem; line-height: 1.4; margin: 8px 0; }
+  </style>
+</head>
+<body>
+
+  <div class="retro-icons">🪩📼🛼🕹️📻</div>
+  <h1>INTEL CEG MYS RETRO NIGHT</h1>
+  <div class="title-line-2">✨ SHAKE-it CHALLENGE ✨</div>
+  <div class="tagline">🕺 SHAKE YOUR GROOVE THING! 🕺</div>
+
+  <!-- Screen 1: Join Screen -->
+  <div id="joinScreen" class="card-box">
+    <label class="input-label">🕺 YOUR NICKNAME</label>
+    <input type="text" id="playerNickname" placeholder="e.g. DiscoQueen" maxlength="14" />
+
+    <label class="input-label">🆔 YOUR WWID</label>
+    <input type="text" id="playerWWID" placeholder="e.g. 12345678" inputmode="numeric" maxlength="10" />
+
+    <button class="btn-main" id="joinBtn" onclick="joinGame()">🚀 JOIN THE DANCE FLOOR</button>
+  </div>
+
+  <!-- Screen 2: Active Game / Standby Screen -->
+  <div id="gameScreen" class="card-box" style="display:none;">
+    <div id="connStatus" class="conn-status conn-bad">🟠 CONNECTING…</div>
+    <div id="playerTag" style="color: #00ffff; font-size: 0.9rem; margin-bottom: 8px; font-weight: bold;"></div>
+    <div id="sensorWarning" class="warn-box" style="display:none;"></div>
+    <div id="roundBadge" class="status-badge status-wait">⏳ STANDBY...</div>
+    <div id="timerDisplay">30s</div>
+    <h3 id="instructionText" style="color: #ff007f; text-shadow: 0 0 8px #ff007f; margin: 5px 0;">EYES ON THE BIG SCREEN!</h3>
+    <div id="scoreDisplay">0</div>
+    <p style="color: #94a3b8; font-size: 0.75rem; margin-top: 15px;">🪩 3 Rounds × 30s • Physical Shake Only 🪩<br>📱 Keep this screen open — don't lock your phone</p>
+  </div>
+
+  <script>
+    // =====================================================================
+    // CONFIG — put your Worker address here after deploying (same in screen.html)
+    // =====================================================================
+    const WORKER_URL = 'https://ceg-retro-shake.YOUR-SUBDOMAIN.workers.dev';
+    const WS_URL = WORKER_URL.replace(/^http/, 'ws') + '/ws';
+
+    // v3 storage key (Cloudflare version) — older saved data is ignored
+    const STORAGE_KEY = 'ceg_retro_shake_cf_v3';
+
+    // Shake detection — same values as the original game
+    const SHAKE_FORCE_THRESHOLD = 22;   // |x|+|y|+|z| (m/s²) needed to count one shake
+    const SHAKE_DEBOUNCE_MS     = 75;   // at most one shake per 75 ms (~13 per second)
+    const PING_MS               = 30000; // keep-alive so idle connections aren't dropped
+
+    // =====================================================================
+    // STATE
+    // =====================================================================
+    let playerId = '';
+    let playerName = '';
+    let gameId = null;          // tournament ID from the server; a new ID wipes old scores
+    let roundScores = {};       // this phone's score per round, e.g. { "1": 210, "2": 185 }
+    let finishedRounds = {};    // rounds this phone has already closed
+    let currentRound = 0;
+    let isRoundActive = false;
+    let roundEndsAt = 0;        // local deadline (Date.now() ms)
+    let syncMs = 1000;          // how often to send my score — the server decides
+    let lastShakeTime = 0;
+    let lastSentScore = -1;
+    let joined = false;
+    let motionBlocked = false;
+    let motionEventsSeen = 0;
+    let motionListenerAttached = false;
+    let hiddenSince = 0;
+    let wakeLock = null;
+    let ws = null;
+    let reconnectAttempt = 0;
+    let reconnectTimer = null;
+    let syncTimeoutId = null;
+    let finalFlushTimeoutId = null;
+    let countdownIntervalId = null;
+    let sensorCheckTimeoutId = null;
+
+    document.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+
+    // =====================================================================
+    // SAVE / LOAD (survives an accidental page refresh)
+    // =====================================================================
+    function totalScore() {
+      return Object.values(roundScores).reduce((sum, n) => sum + (Number(n) || 0), 0);
+    }
+
+    function loadSavedState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (saved.nick) document.getElementById('playerNickname').value = saved.nick;
+        if (saved.wwid) document.getElementById('playerWWID').value = saved.wwid;
+        if (typeof saved.gameId === 'string') gameId = saved.gameId;
+        if (saved.roundScores && typeof saved.roundScores === 'object') roundScores = saved.roundScores;
+        if (saved.finishedRounds && typeof saved.finishedRounds === 'object') finishedRounds = saved.finishedRounds;
+        if (typeof saved.currentRound === 'number') currentRound = saved.currentRound;
+      } catch (e) {}
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          nick: document.getElementById('playerNickname').value.trim(),
+          wwid: document.getElementById('playerWWID').value.trim(),
+          gameId, roundScores, finishedRounds, currentRound
+        }));
+      } catch (e) {}
+    }
+
+    loadSavedState();
+
+    // =====================================================================
+    // UI HELPERS
+    // =====================================================================
+    function setConnStatus(ok) {
+      const el = document.getElementById('connStatus');
+      if (!el) return;
+      el.className = 'conn-status ' + (ok ? 'conn-ok' : 'conn-bad');
+      el.innerText = ok ? '🟢 CONNECTED' : '🟠 RECONNECTING…';
+    }
+
+    function showWarning(html) {
+      const el = document.getElementById('sensorWarning');
+      el.innerHTML = html;
+      el.style.display = html ? 'block' : 'none';
+    }
+
+    // Keep the screen awake so the phone doesn't lock between rounds
+    async function keepScreenOn() {
+      try {
+        if ('wakeLock' in navigator && !wakeLock && document.visibilityState === 'visible') {
+          wakeLock = await navigator.wakeLock.request('screen');
+          wakeLock.addEventListener('release', () => { wakeLock = null; });
+        }
+      } catch (e) {
+        console.warn('Wake lock not available:', e);
+      }
+    }
+
+    // =====================================================================
+    // CONNECTION TO THE GAME SERVER
+    // =====================================================================
+    let connectStartedAt = 0;
+    let awaitingReplySince = 0;   // when we sent something the server must answer (score or ping)
+
+    function connect() {
+      if (!joined) return;
+      if (ws && (ws.readyState === 0 || ws.readyState === 1)) return;   // connecting / open
+      clearTimeout(reconnectTimer);
+      const url = `${WS_URL}?role=player&id=${encodeURIComponent(playerId)}&name=${encodeURIComponent(playerName)}`;
+      let sock;
+      try { sock = new WebSocket(url); } catch (e) { scheduleReconnect(); return; }
+      ws = sock;
+      connectStartedAt = Date.now();
+      awaitingReplySince = 0;
+      sock.onopen = () => { reconnectAttempt = 0; setConnStatus(true); };
+      sock.onmessage = (ev) => {
+        if (ws !== sock) return;
+        awaitingReplySince = 0;                       // server is alive
+        if (ev.data === 'pong' || ev.data === 'ok') return;
+        let msg;
+        try { msg = JSON.parse(ev.data); } catch (e) { return; }
+        handleServerMessage(msg);
+      };
+      sock.onclose = () => {
+        if (ws !== sock) return;                      // already abandoned by the watchdog
+        ws = null;
+        setConnStatus(false);
+        scheduleReconnect();
+      };
+      sock.onerror = () => { /* onclose follows */ };
+    }
+
+    // Give up on a connection that has gone silent and open a fresh one right away.
+    // (A broken Wi-Fi link can take a long time before the browser reports it as closed.)
+    function abandonConnection() {
+      const dead = ws;
+      ws = null;
+      if (dead) {
+        dead.onopen = dead.onmessage = dead.onclose = dead.onerror = null;
+        try { dead.close(); } catch (e) {}
+      }
+      setConnStatus(false);
+      reconnectAttempt = 0;
+      connect();
+    }
+
+    setInterval(() => {
+      if (!joined || !ws) return;
+      const t = Date.now();
+      if (ws.readyState === 0 && t - connectStartedAt > 5000) abandonConnection();            // stuck connecting
+      else if (ws.readyState === 1 && awaitingReplySince && t - awaitingReplySince > 4000) abandonConnection(); // no reply
+      else if (ws.readyState === 2) abandonConnection();                                       // stuck closing
+    }, 1000);
+
+    function scheduleReconnect() {
+      if (!joined) return;
+      clearTimeout(reconnectTimer);
+      const steps = [500, 1000, 2000, 4000, 8000];
+      const wait = steps[Math.min(reconnectAttempt, steps.length - 1)] * (0.8 + Math.random() * 0.4);
+      reconnectAttempt++;
+      reconnectTimer = setTimeout(connect, wait);
+    }
+
+    function sendToServer(obj) {
+      if (!ws || ws.readyState !== 1) return false;
+      try {
+        ws.send(JSON.stringify(obj));
+        if (!awaitingReplySince) awaitingReplySince = Date.now();
+        return true;
+      } catch (e) { return false; }
+    }
+
+    // Keep-alive between rounds (answered by Cloudflare without waking the server = free)
+    setInterval(() => {
+      if (ws && ws.readyState === 1) {
+        try { ws.send('ping'); if (!awaitingReplySince) awaitingReplySince = Date.now(); } catch (e) {}
+      }
+    }, PING_MS);
+
+    // =====================================================================
+    // JOIN
+    // =====================================================================
+    async function joinGame() {
+      const nickInput = document.getElementById('playerNickname').value.trim();
+      const wwidInput = document.getElementById('playerWWID').value.trim();
+
+      if (!nickInput || !wwidInput) {
+        alert('Please enter BOTH your Nickname and WWID to join!');
+        return;
+      }
+
+      const cleanWwid = wwidInput.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+      playerId = 'p_' + (cleanWwid || Math.random().toString(36).substring(2, 10));
+      playerName = `${nickInput} (${wwidInput})`;
+      saveState();
+      document.getElementById('playerTag').innerText = `🕹️ PLAYER: ${playerName}`;
+
+      keepScreenOn();   // start inside the tap (no await)
+
+      // iPhone: ask for motion permission and CHECK the answer
+      motionBlocked = false;
+      if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+        try {
+          const answer = await DeviceMotionEvent.requestPermission();
+          if (answer !== 'granted') motionBlocked = true;
+        } catch (err) {
+          console.warn('Motion permission request failed:', err);
+        }
+      }
+
+      document.getElementById('joinScreen').style.display = 'none';
+      document.getElementById('gameScreen').style.display = 'block';
+      joined = true;
+
+      if (!motionListenerAttached) {
+        window.addEventListener('devicemotion', handleMotion, false);
+        motionListenerAttached = true;
+      }
+
+      if (motionBlocked) {
+        showWarning('⚠️ MOTION SENSOR BLOCKED<br>Close this tab, scan the QR again and tap <b>ALLOW</b>.');
+      } else {
+        showWarning('');
+        clearTimeout(sensorCheckTimeoutId);
+        const seenBefore = motionEventsSeen;
+        sensorCheckTimeoutId = setTimeout(() => {
+          if (motionEventsSeen === seenBefore) {
+            showWarning('⚠️ NO MOTION DETECTED<br>Open the link in Safari or Chrome (not inside WhatsApp/Telegram). On iPhone, reopen and tap <b>ALLOW</b>.');
+          }
+        }, 3000);
+      }
+
+      connect();
+    }
+
+    // =====================================================================
+    // MESSAGES FROM THE SERVER
+    // =====================================================================
+    function adoptNewGame(newGameId, serverRounds) {
+      // New tournament: forget any old scores (rehearsal, previous event)
+      isRoundActive = false;
+      clearInterval(countdownIntervalId);
+      clearTimeout(syncTimeoutId);
+      clearTimeout(finalFlushTimeoutId);
+      gameId = newGameId;
+      roundScores = Object.assign({}, serverRounds || {});
+      finishedRounds = {};
+      currentRound = 0;
+      lastSentScore = -1;
+      saveState();
+    }
+
+    function showStandby() {
+      document.getElementById('roundBadge').className = 'status-badge status-wait';
+      document.getElementById('roundBadge').innerText = '⏳ STANDBY...';
+      document.getElementById('timerDisplay').innerText = '30s';
+      document.getElementById('instructionText').innerText = totalScore() > 0
+        ? `TOTAL SCORE: ${totalScore()} PTS` : 'EYES ON THE BIG SCREEN!';
+      document.getElementById('scoreDisplay').innerText = '0';
+    }
+
+    function handleServerMessage(m) {
+      if (m.t === 'welcome') {
+        // Sent on every (re)connect: the server tells us where the game is right now
+        if (m.gameId !== gameId) adoptNewGame(m.gameId, m.rounds);
+        if (typeof m.syncMs === 'number') syncMs = m.syncMs;
+        // Server is missing points we counted (e.g. final score lost in a drop)? Send them again.
+        const server = m.rounds || {};
+        const missing = Object.keys(roundScores).some((r) => (roundScores[r] || 0) > (server[r] || 0));
+        if (m.phase === 'live') {
+          if (isRoundActive && currentRound === m.round) {
+            roundEndsAt = Date.now() + m.timeLeft * 1000;       // re-sync the clock
+          } else if (!finishedRounds[m.round] && m.timeLeft > 1) {
+            // Joined late / refreshed / reconnected mid-round: jump in with the time left
+            if ((server[m.round] || 0) > (roundScores[m.round] || 0)) roundScores[m.round] = server[m.round];
+            startRound(m.round, m.timeLeft, false);
+          }
+        } else {
+          if (isRoundActive) finalizeRound();                   // round ended while we were offline
+          else if (!currentRound) showStandby();
+        }
+        if (missing) sendScoreUpdate(true);
+        return;
+      }
+
+      if (m.gameId && m.gameId !== gameId && m.t !== 'reset') adoptNewGame(m.gameId);
+
+      if (m.t === 'start') {
+        if (typeof m.syncMs === 'number') syncMs = m.syncMs;
+        startRound(m.round, m.timeLeft || 30, true);
+      } else if (m.t === 'end') {
+        finalizeRound();
+      } else if (m.t === 'reset') {
+        adoptNewGame(m.gameId);
+        showStandby();
+      }
+    }
+
+    // =====================================================================
+    // SENDING MY SCORE
+    // =====================================================================
+    function sendScoreUpdate(force = false) {
+      if (!gameId || !currentRound) return false;
+      const score = roundScores[currentRound] || 0;
+      if (!force && score === lastSentScore) return true;
+      saveState();
+      const ok = sendToServer({ t: 'score', gameId, round: currentRound, score, all: roundScores });
+      if (ok) lastSentScore = score;
+      return ok;
+    }
+
+    function scheduleNextScoreSync(first = false) {
+      clearTimeout(syncTimeoutId);
+      if (!isRoundActive) return;
+      const delay = first ? Math.random() * syncMs : syncMs * (0.9 + Math.random() * 0.2);
+      syncTimeoutId = setTimeout(() => {
+        if (!isRoundActive) return;
+        sendScoreUpdate(false);
+        scheduleNextScoreSync(false);
+      }, delay);
+    }
+
+    // =====================================================================
+    // ROUND FLOW
+    // =====================================================================
+    function startCountdown() {
+      clearInterval(countdownIntervalId);
+      const tick = () => {
+        if (!isRoundActive) { clearInterval(countdownIntervalId); return; }
+        const left = Math.max(0, Math.ceil((roundEndsAt - Date.now()) / 1000));
+        document.getElementById('timerDisplay').innerText = `${left}s`;
+        if (Date.now() >= roundEndsAt) finalizeRound();   // phone closes its own round
+      };
+      tick();
+      countdownIntervalId = setInterval(tick, 250);
+    }
+
+    function startRound(round, timeLeftSec, isFreshStart) {
+      if (isRoundActive) finalizeRound();
+      currentRound = round;
+      if (isFreshStart || typeof roundScores[round] !== 'number') roundScores[round] = 0;
+      delete finishedRounds[round];
+      isRoundActive = true;
+      roundEndsAt = Date.now() + Math.max(1, timeLeftSec) * 1000;
+      lastSentScore = -1;
+      clearTimeout(finalFlushTimeoutId);
+      saveState();
+
+      document.getElementById('scoreDisplay').innerText = roundScores[round];
+      document.getElementById('roundBadge').className = 'status-badge status-shake';
+      document.getElementById('roundBadge').innerText = `🔥 ROUND ${round} LIVE! 🔥`;
+      document.getElementById('instructionText').innerText = '🪩 SHAKE IT TO THE MAX! 🪩';
+      startCountdown();
+      scheduleNextScoreSync(true);
+    }
+
+    function finalizeRound() {
+      if (!isRoundActive) return;
+      isRoundActive = false;
+      finishedRounds[currentRound] = true;
+      clearInterval(countdownIntervalId);
+      clearTimeout(syncTimeoutId);
+      saveState();
+
+      document.getElementById('roundBadge').className = 'status-badge status-wait';
+      document.getElementById('roundBadge').innerText = `🏁 ROUND ${currentRound} COMPLETE!`;
+      document.getElementById('timerDisplay').innerText = 'TIME UP!';
+      document.getElementById('instructionText').innerText = `TOTAL SCORE: ${totalScore()} PTS`;
+
+      // Final score: spread over 0–1.5 s; retry every second (up to 5×) if offline.
+      // If it still can't get through, the next reconnect re-sends it automatically.
+      clearTimeout(finalFlushTimeoutId);
+      const roundToFlush = currentRound;
+      const tryFlush = (attempt) => {
+        if (isRoundActive || currentRound !== roundToFlush) return;
+        if (!sendScoreUpdate(true) && attempt < 5) {
+          finalFlushTimeoutId = setTimeout(() => tryFlush(attempt + 1), 1000);
+        }
+      };
+      finalFlushTimeoutId = setTimeout(() => tryFlush(0), Math.floor(Math.random() * 1500));
+    }
+
+    // =====================================================================
+    // SHAKE DETECTION (same rule as the original)
+    // =====================================================================
+    function handleMotion(event) {
+      const acc = event.accelerationIncludingGravity || event.acceleration;
+      if (!acc) return;
+      motionEventsSeen++;
+      if (!isRoundActive) return;
+      const now = Date.now();
+      if (now >= roundEndsAt) return;
+
+      const totalForce = Math.abs(acc.x || 0) + Math.abs(acc.y || 0) + Math.abs(acc.z || 0);
+      if (totalForce > SHAKE_FORCE_THRESHOLD && (now - lastShakeTime > SHAKE_DEBOUNCE_MS)) {
+        roundScores[currentRound] = (roundScores[currentRound] || 0) + 1;
+        lastShakeTime = now;
+        document.getElementById('scoreDisplay').innerText = roundScores[currentRound];
+      }
+    }
+
+    // =====================================================================
+    // COMING BACK FROM LOCK SCREEN / ANOTHER APP
+    // =====================================================================
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') { hiddenSince = Date.now(); return; }
+      keepScreenOn();
+      if (joined) {
+        if (isRoundActive && Date.now() >= roundEndsAt) finalizeRound();
+        if (!ws || ws.readyState > 1) { reconnectAttempt = 0; connect(); }
+        else if (hiddenSince && Date.now() - hiddenSince > 3000) sendToServer({ t: 'hello' });   // ask "where are we?"
+      }
+      hiddenSince = 0;
+    });
+
+    document.addEventListener('touchstart', () => { if (joined && !wakeLock) keepScreenOn(); }, { passive: true });
+  </script>
+</body>
+</html>
