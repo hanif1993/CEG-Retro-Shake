@@ -61,11 +61,11 @@
 
   <!-- Screen 1: Join Screen -->
   <div id="joinScreen" class="card-box">
-    <label class="input-label">🕺 YOUR NICKNAME</label>
-    <input type="text" id="playerNickname" placeholder="e.g. DiscoQueen" maxlength="14" />
+    <label class="input-label">🕺 YOUR NAME</label>
+    <input type="text" id="playerName" placeholder="e.g. Aisyah" maxlength="20" />
 
-    <label class="input-label">🆔 YOUR WWID</label>
-    <input type="text" id="playerWWID" placeholder="e.g. 12345678" inputmode="numeric" maxlength="10" />
+    <label class="input-label">🍽️ TABLE NUMBER</label>
+    <input type="text" id="playerTable" placeholder="e.g. 12" inputmode="numeric" maxlength="4" />
 
     <button class="btn-main" id="joinBtn" onclick="joinGame()">🚀 JOIN THE DANCE FLOOR</button>
   </div>
@@ -159,8 +159,8 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return;
         const saved = JSON.parse(raw);
-        if (saved.nick) document.getElementById('playerNickname').value = saved.nick;
-        if (saved.wwid) document.getElementById('playerWWID').value = saved.wwid;
+        if (saved.name) document.getElementById('playerName').value = saved.name;
+        if (saved.table) document.getElementById('playerTable').value = saved.table;
         if (typeof saved.gameId === 'string') gameId = saved.gameId;
         if (saved.roundScores && typeof saved.roundScores === 'object') roundScores = saved.roundScores;
         if (saved.finishedRounds && typeof saved.finishedRounds === 'object') finishedRounds = saved.finishedRounds;
@@ -171,8 +171,8 @@
     function saveState() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          nick: document.getElementById('playerNickname').value.trim(),
-          wwid: document.getElementById('playerWWID').value.trim(),
+          name: document.getElementById('playerName').value.trim(),
+          table: document.getElementById('playerTable').value.trim(),
           gameId,
           roundScores,
           finishedRounds,
@@ -215,18 +215,33 @@
     // =====================================================================
     // JOIN
     // =====================================================================
-    async function joinGame() {
-      const nickInput = document.getElementById('playerNickname').value.trim();
-      const wwidInput = document.getElementById('playerWWID').value.trim();
+    // Stable ID for this phone (survives a page refresh, unique per phone)
+    function getDeviceId() {
+      const KEY = 'ceg_retro_shake_device_id';
+      const make = () => 'p_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      try {
+        let id = localStorage.getItem(KEY);
+        if (!id) { id = make(); localStorage.setItem(KEY, id); }
+        return id;
+      } catch (e) {
+        if (!window.__cegDeviceId) window.__cegDeviceId = make();
+        return window.__cegDeviceId;
+      }
+    }
 
-      if (!nickInput || !wwidInput) {
-        alert('Please enter BOTH your Nickname and WWID to join!');
+    async function joinGame() {
+      const nameInput = document.getElementById('playerName').value.trim();
+      const tableInput = document.getElementById('playerTable').value.trim();
+
+      if (!nameInput || !tableInput) {
+        alert('Please enter BOTH your Name and Table Number to join!');
         return;
       }
 
-      const cleanWwid = wwidInput.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-      playerId = 'p_' + (cleanWwid || Math.random().toString(36).substring(2, 10));
-      playerName = `${nickInput} (${wwidInput})`;
+      // Each phone gets its own private ID — people at the same table must NOT share one,
+      // otherwise they would overwrite each other's scores.
+      playerId = getDeviceId();
+      playerName = `${nameInput} (Table ${tableInput})`;
       saveState();
       document.getElementById('playerTag').innerText = `🕹️ PLAYER: ${playerName}`;
 
